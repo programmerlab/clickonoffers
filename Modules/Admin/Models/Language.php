@@ -7,16 +7,15 @@ namespace Modules\Admin\Models;
 use Illuminate\Database\Eloquent\Model as Eloquent;
  
 
-class  Country extends Eloquent
+class  Language extends Eloquent
 {
      
-    protected $parent = 'parent_id';
-    /**
+     /**
      * The database table used by the model.
      *
      * @var string
      */
-    protected $table = 'country_languages';
+    protected $table = 'all_languages';
     /**
      * The attributes that are mass assignable.
      *
@@ -29,10 +28,5 @@ class  Country extends Eloquent
      */
     protected $primaryKey = 'id';
 
-    public function activeLanguage(){
-        return $this->belongsTo('Modules\Admin\Models\Language','active_language','id');
-    }
-    public function country(){
-        return $this->belongsTo('Modules\Admin\Models\AllCountries','country_id','id');
-    }
+    
 }

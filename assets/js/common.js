@@ -1,3 +1,22 @@
+function initMap(){
+ 
+    var input = document.getElementById('location');
+    var autocomplete = new google.maps.places.Autocomplete(input,{types: ['(cities)']});
+    google.maps.event.addListener(autocomplete, 'place_changed', function(){
+    var place = autocomplete.getPlace();
+
+    // var latitude = place.geometry.location.lat();
+    // var longitude = place.geometry.location.lng(); 
+
+    // $("#latitude").val(latitude);
+    // $("#longitude").val(longitude);  
+
+});
+
+}
+
+
+
 function popupAlert(url,id){
     bootbox.confirm({
     title: "Destroy default category?",
@@ -20,16 +39,35 @@ function popupAlert(url,id){
 });
 }
   
+  function removelanguae(id){
+    $('#'+id).remove();
+  }
  
 $(function(){ 
-$('#saveBtn').removeAttr('disabled');
-$('.legitRipple').removeAttr('disabled');
+    $('#saveBtn').removeAttr('disabled');
+    
+    $('.legitRipple').removeAttr('disabled');
+    var id=1;
+    $('#add_language').click(function(){
+        var make_default_language=[];
+       
+        $(".make_default_language:checked").each(function() {
+           make_default_language.push($(this).val());
+        });
 
-$('#add_language').click(function(){
-     var html = $('#language').html();
+        console.log(make_default_language);
+        id++;
+        var rm = '<div class="col-md-2">'+
+                    '<button type="button" id="remove_language" onclick="removelanguae('+id+')" class="circle btn alert sm alert-danger">Remove</button>'+
+                '</div>';
 
-     $('#language').before('<div class="col-md-10">'+html+'</div>');
-});
+         var html = $('#language').html();
+         $('#language').after('<div class="col-md-10 clone" id="'+id+'">'+html+rm+'</div>');
+         
+        $('.clone').clone(true); 
+        
+
+    });
 
 /*
 Method : Delete particulare record

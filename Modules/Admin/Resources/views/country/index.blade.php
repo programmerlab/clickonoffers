@@ -49,14 +49,53 @@
 	                <thead>
 	                    <tr>
                     	 	<th>  Sno. </th>
-	                        <th> Sub Category Name </th>
-	                        <th> Category Name </th>
-	                        <th> Image </th> 
+	                        <th> Country Name </th>
+                           <th> Currency </th>
+                            <th> Country Code </th>
+	                        <th> Active Language</th>
+	                        <th> Status </th> 
+                          <th> Location </th>
 	                        <th>Created date</th> 
 	                        <th>Action</th> 
 	                    </tr>
 	                </thead>
 	                <tbody>
+
+                    <thead>
+                      @foreach($country as $key => $result)
+                      <tr>
+                          <td>{{$key++}}</td>
+                           
+                          <td>{{$result->country->name??'NA'}}</td>
+                          <td>{{$result->country->currency??'NA'}}</td>
+                          <td>{{$result->country->callingCodes??'NA'}}</td>
+                          <td>{{ $result->activeLanguage->name??'NA' }}</td>
+                          <td>{{($result->status==1)?'Active':'Inactive'}}</td>
+                          <td>{{$result->location??'NA'}}</td>
+
+                          <td>
+                              {!! Carbon\Carbon::parse($result->created_at)->format($date_format); !!}
+                        </td>
+                                
+                        <td> 
+                                    
+                            <a href="{{ route('country.edit',$result->id)}}" class="btn btn-primary btn-xs" style="margin-left: 20px">
+                            <i class="fa fa-edit" title="edit"></i> Edit
+                            </a>
+
+                            {!! Form::open(array('class' => 'form-inline pull-left deletion-form', 'method' => 'DELETE',  'id'=>'deleteForm_'.$result->id, 'route' => array('country.destroy', $result->id))) !!}
+
+                            <button class='delbtn btn btn-danger btn-xs' type="submit" name="remove_levels" value="delete" id="{{$result->id}}"><i class="fa fa-trash" title="Delete"></i> Delete
+                            </button>
+
+                            {!! Form::close() !!}
+
+                                </td>
+
+
+                      </tr>
+                      @endforeach
+                    </thead>
 	                 
 	                    
 	                </tbody>

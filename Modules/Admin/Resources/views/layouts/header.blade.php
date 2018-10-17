@@ -23,7 +23,8 @@
         <link href="{{ URL::asset('assets/css/colors.css')}}" rel="stylesheet" type="text/css">
         <!-- /global stylesheets -->
  
- 
+        
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRXJxQZefgiAbDF2U7Qqv8PNoqBgRiYUc&libraries=places"></script>
 
 
         <script>

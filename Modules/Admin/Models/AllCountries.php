@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Modules\Admin\Models;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
+ 
 
-class Blogs extends Eloquent
+class  AllCountries extends Eloquent
 {
-    /**
+     
+   /**
      * The database table used by the model.
      *
      * @var string
      */
-    protected $table = 'blogs';
+    protected $table = 'all_countries';
     /**
      * The attributes that are mass assignable.
      *
@@ -26,18 +28,5 @@ class Blogs extends Eloquent
      */
     protected $primaryKey = 'id';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = ['blog_title','blog_sub_title','blog_description','blog_image','blog_created_by']; // All field of user table here
-
-
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
+    
 }

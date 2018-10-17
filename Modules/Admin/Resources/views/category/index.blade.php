@@ -66,11 +66,11 @@
                             <a href="{{ asset($result->category_image)  }}" target="_blank" >
                             <img src="{{ asset($result->category_image)  }}" width="100px" height="50px;">
                              </a>  </td>
-                              <td>
-                                {!! Carbon\Carbon::parse($result->created_at)->format($date_format); !!}
-                          </td>
+                        <td>
+                              {!! Carbon\Carbon::parse($result->created_at)->format($date_format); !!}
+                        </td>
                                 
-                      <td> 
+                        <td> 
                                     
                             <a href="{{ route('category.edit',$result->id)}}" class="btn btn-primary btn-xs" style="margin-left: 20px">
                             <i class="fa fa-edit" title="edit"></i> Edit
