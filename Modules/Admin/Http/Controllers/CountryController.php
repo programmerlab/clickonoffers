@@ -46,7 +46,7 @@ class CountryController extends Controller
         $this->defaultUrl   = route('country');
         $this->createMessage = 'Record created successfully.';
         $this->updateMessage = 'Record updated successfully.';
-        $this->deleteMessqge =  'Record deleted successfully.';
+        $this->deleteMessage =  'Record deleted successfully.';
 
         $this->country = \DB::table('all_countries')->get();
     }
@@ -167,9 +167,9 @@ class CountryController extends Controller
         return view($this->editUrl, compact('country', 'page_title', 'page_action','language_list','country_list'));
     }
 
-    public function update(Request $request, $country)
+    public function update(Request $request, Country $country)
     {
-         
+        
         $country->country_id = $request->get('country');
         $country->status = $request->get('status');
         $country->default_language_eng = $request->get('default_language');
@@ -194,7 +194,7 @@ class CountryController extends Controller
         }
         $country->other_default_language = $other_language??0;
         $country->other_languages = json_encode($lang);
-        $country->active_language =  $active_language??$request->get('location');
+        $country->active_language =  $active_language??$request->get('default_language');
         $country->save();
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->updateMessage);
@@ -204,8 +204,8 @@ class CountryController extends Controller
      * @param ID
      *
      */
-    public function destroy(Request $request, $country)
-    {
+    public function destroy(Request $request, Country $country)
+    {    
          $country->delete();
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->deleteMessage);
