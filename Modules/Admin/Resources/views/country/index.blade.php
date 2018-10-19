@@ -77,7 +77,15 @@
                           </td> 
 
                           <td>{{ $result->activeLanguage->name??'NA' }}</td>
-                          <td>{{($result->status==1)?'Active':'Inactive'}}</td>
+                          <td> 
+
+                             <span class="label label-{{ ($result->status==1)?'success':'warning'}} status" id="{{$result->id}}"  data="{{$result->status}}"  onclick="changeStatus({{$result->id}},'country')" >
+                                                            {{ ($result->status==1)?'Active':'Inactive'}}
+                                                        </span>
+
+
+
+                          </td>
                           <td>{{$result->location??'NA'}}</td>
 
                           <td>

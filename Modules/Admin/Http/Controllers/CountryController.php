@@ -70,8 +70,7 @@ class CountryController extends Controller
             $s            = ($status == 1) ? $status=0:$status=1;
             $user->status = $s;
             $user->save();
-            echo $s;
-
+            echo $s; 
             exit();
         }
         // Search by name ,email and group
