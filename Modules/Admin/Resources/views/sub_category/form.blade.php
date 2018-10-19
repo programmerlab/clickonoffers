@@ -2,7 +2,8 @@
         
         <div class="row">
 
-          
+        @include('admin::partials.country2')
+
 	    <div class="col-md-12"> 
             <div class="form-group {{ $errors->first('category_name', ' has-error') }}">
                  <label class="control-label col-md-2">Select  Category
@@ -14,6 +15,7 @@
                 </div>
             </div> 
         </div>
+        
         <div class="col-md-12">
             <div class="form-group {{ $errors->first('sub_category_name', ' has-error') }}
             @if(session('field_errors')) {{ 'has-error' }} @endif
@@ -55,7 +57,7 @@
         </div>
                  
              
-        <div class="col-md-8">
+        <div class="col-md-12">
                   <div class="form-group pull-right ">
                 {!! Form::submit(' Save ', ['class'=>'btn  btn-primary text-white','id'=>'saveBtn']) !!}
 

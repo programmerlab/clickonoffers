@@ -14,7 +14,7 @@
       <h6 class="panel-title"><b>Create {{$page_title ?? ''}}</b><a class="heading-elements-toggle"><i class="icon-more"></i></a></h6>
       <div class="heading-elements">
       <ul class="icons-list">
-        <li> <a type="button" href="{{route('category')}}" class="btn btn-primary text-white   btn-rounded "> View categories<span class="legitRipple-ripple" ></span></a></li> 
+        <li> <a type="button" href="{{route('sub-category')}}" class="btn btn-primary text-white   btn-rounded "> View categories<span class="legitRipple-ripple" ></span></a></li> 
       </ul>
       </div>
       </div> 

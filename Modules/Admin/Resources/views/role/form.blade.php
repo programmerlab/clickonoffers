@@ -10,7 +10,10 @@
                       <span class="help-block">{{ $errors->first('name', ':message') }}</span>
                 </div>
             </div>
+    
+            @include('admin::partials.country')
 
+            
             <div class="col-md-6">
                 <div class="form-group {{ $errors->first('role_type', ' has-error') }}">
                     <label>Role Type: <span class="text-danger">*</span></label> 
@@ -26,10 +29,10 @@
             </div>
 
 
-             <div class="col-md-12">
+             <div class="col-md-6">
                 <div class="form-group {{ $errors->first('description', ' has-error') }}">
                     <label>Description: <span class="text-danger">*</span></label> 
-                     {!! Form::text('description',null, ['class' => 'form-control required' ,'data-required'=>1])  !!} 
+                     {!! Form::textarea('description',null, ['class' => 'form-control required' ,'data-required'=>1])  !!} 
                       <span class="help-block">{{ $errors->first('description', ':message') }}</span>
                 </div>
             </div>

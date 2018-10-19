@@ -15,8 +15,9 @@ use Modules\Admin\Models\Country;
 use Modules\Admin\Models\User;
 use Route;
 use View;
-use Session;
-
+use Validator;
+use Session; 
+use Modules\Admin\Http\Requests\CountryRequest;
 /**
  * Class SingleUsersController
  */
@@ -80,7 +81,9 @@ class CountryController extends Controller
         if ((isset($search) && !empty($search)) or  (isset($status) && !empty($status)) or !empty($role_type)) {
             $search = isset($search) ? Input::get('search') : '';
 
-            $country = Country::where(function ($query) use ($search,$status,$role_type) {
+            $country =  Country::with(['country'=>function($q){
+                    $q->where('module_name','country_languages');
+                }])->with('activeLanguage')->where(function ($query) use ($search,$status) {
                 if (!empty($search)) {
                     $query->Where('country_id', 'LIKE', "%$search%")
                         ->OrWhere('status', 'LIKE', "%$search%") ;
@@ -93,8 +96,13 @@ class CountryController extends Controller
                 }
             })->Paginate($this->record_per_page);
         } else {
-            $country = Country::with('country','activeLanguage')->orderBy('id', 'desc')->Paginate($this->record_per_page);
-        }
+            $country = Country::with(['country'=>function($q){
+                    $q->where('module_name','country_languages');
+                }])->with('activeLanguage')
+                ->orderBy('id', 'desc')->Paginate($this->record_per_page);
+        } 
+         
+
           //  dd($country[0]->activeLanguage->name);
         return view($this->indexUrl, compact('status', 'country', 'page_title', 'page_action'));
     }
@@ -108,7 +116,6 @@ class CountryController extends Controller
         $page_title  =  str_replace(['.','create'],'', ucfirst(Route::currentRouteName()));
         $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
 
-        $country_list = $this->country;
         $language_list = \DB::table('all_languages')->select('id','lang_code','name')->get();
         
         return view($this->createUrl, compact('language_list','country_list','country', 'page_title', 'page_action'));
@@ -118,9 +125,12 @@ class CountryController extends Controller
      * Save Group method
      * */
 
-    public function store(Request $request, Country $country)
+    public function store(CountryRequest $request, Country $country)
     {
-        $country->country_id = $request->get('country');
+        $request->validate([ 
+            'location' => 'required',
+        ]);
+
         $country->status = $request->get('status');
         $country->default_language_eng = $request->get('default_language');
         $country->location = $request->get('location');
@@ -145,7 +155,15 @@ class CountryController extends Controller
         $country->other_default_language = $other_language??0;
         $country->other_languages = json_encode($lang);
         $country->active_language =  $active_language??$request->get('default_language');
-        $country->save();
+        
+       try {
+            \DB::beginTransaction(); 
+            $country->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$country->getTable(),$country->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        } 
 
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->createMessage);
@@ -161,16 +179,20 @@ class CountryController extends Controller
     {   $page_title  =  str_replace(['.','edit'],'', ucfirst(Route::currentRouteName()));
         $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
 
-        $country_list = $this->country;
         $language_list = \DB::table('all_languages')->select('id','lang_code','name')->get();
-        
+       
+       $country->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$country->id)
+                            ->where('module_name',$country->getTable())->pluck('country_id'); 
+
+
         return view($this->editUrl, compact('country', 'page_title', 'page_action','language_list','country_list'));
     }
 
     public function update(Request $request, Country $country)
     {
-        
-        $country->country_id = $request->get('country');
+         $request->validate([ 
+            'location' => 'required',
+        ]);
         $country->status = $request->get('status');
         $country->default_language_eng = $request->get('default_language');
         $country->location = $request->get('location');
@@ -195,7 +217,16 @@ class CountryController extends Controller
         $country->other_default_language = $other_language??0;
         $country->other_languages = json_encode($lang);
         $country->active_language =  $active_language??$request->get('default_language');
-        $country->save();
+        
+        try {
+            \DB::beginTransaction(); 
+            $country->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$country->getTable(),$country->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        }
+
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->updateMessage);
     }

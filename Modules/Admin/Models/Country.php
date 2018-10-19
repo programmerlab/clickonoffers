@@ -32,7 +32,10 @@ class  Country extends Eloquent
     public function activeLanguage(){
         return $this->belongsTo('Modules\Admin\Models\Language','active_language','id');
     }
+
     public function country(){
-        return $this->belongsTo('Modules\Admin\Models\AllCountries','country_id','id');
+        return $this->hasMany('Modules\Admin\Models\CountryModule','module_row_id')->with('countryName');
     }
+
+    
 }

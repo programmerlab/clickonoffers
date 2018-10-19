@@ -42,23 +42,7 @@ class User extends Authenticatable
         'email',
         'role_type',
         'password',
-        'status',
-        'tagLine',
-        'address',
-        'birthday',
-        'skills',
-        'modeOfreach',
-        'language',
-        'qualification',
-        'workExperience',
-        'percentageCompletion',
-        'rating',
-        'position',
-        'extension',
-        'dateOfBirth',
-        'companyLogo',
-        'occupation',
-        'interests',
+        'status'
     ];  // All field of user table h
 
 

@@ -15,7 +15,7 @@ use Modules\Admin\Models\Category;
 use Route;
 use URL;
 use View; 
-
+use Modules\Admin\Http\Requests\CountryRequest;
 /**
  * Class AdminController
  */
@@ -90,8 +90,9 @@ class CategoryController extends Controller
 
     public function create(Category $category)
     {
-        $page_title  = 'Category';
-        $page_action = 'Edit category'; 
+        $page_title  =  str_replace(['.','create'],'', ucfirst(Route::currentRouteName()));
+        $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
+
         return view('admin::category.create', compact('category', 'url', 'page_title', 'page_action', 'page_title'));
     }
 
@@ -99,8 +100,13 @@ class CategoryController extends Controller
      * Save Group method
      * */
 
-    public function store(CategoryRequest $request, Category $category)
+    public function store(CountryRequest $request,Category $category)
     {
+        $request->validate([  
+            'category_name' => 'required',
+            'category_image' => 'required|mimes:jpeg,bmp,png,gif,jpg,PNG',
+        ]);
+
         $parent_id = 0;
 
         $validate_cat = Category::where('category_name', $request->get('category_name'))
@@ -129,9 +135,16 @@ class CategoryController extends Controller
         $category->category_name  =  $request->get('category_name');
         $category->level          =  1;
         $category->description    =  $request->get('description');
+ 
 
-
-        $category->save();
+       try {
+            \DB::beginTransaction(); 
+            $category->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$category->getTable(),$category->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        } 
 
         return Redirect::to(route('category'))
             ->with('flash_alert_notice', 'New category  successfully created !');
@@ -146,17 +159,24 @@ class CategoryController extends Controller
     public function edit(Request $request, $category)
     {
           
-        $page_title  = 'Category';
-        $page_action = 'Edit category';
+        $page_title  =  str_replace(['.','edit'],'', ucfirst(Route::currentRouteName()));
+        $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
+
         if($category->category_image){
             $url         = url($category->category_image) ;
         }
-         
+        $category->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$category->id)
+                            ->where('module_name',$category->getTable())->pluck('country_id');
+
         return view('admin::category.edit', compact('url', 'category' ,'page_title', 'page_action'));
     }
 
-    public function update(CategoryRequest $request, $category)
+    public function update(CountryRequest $request, $category)
     {
+        $request->validate([  
+            'category_name' => 'required'
+        ]);
+
         $parent_id = 0;
 
         $validate_cat = Category::where('category_name', $request->get('category_name'))
@@ -186,8 +206,15 @@ class CategoryController extends Controller
         $category->level          =  1;
         $category->description    =  $request->get('description');
 
+        try {
+            \DB::beginTransaction(); 
+            $category->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$category->getTable(),$category->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        } 
 
-        $category->save();
 
         return Redirect::to(route('category'))
             ->with('flash_alert_notice', 'Category  successfully updated.');
@@ -199,6 +226,7 @@ class CategoryController extends Controller
      */
     public function destroy(Request $request, $category)
     {
+        
         $count = Category::where('parent_id',$category->id)->count();
 
          if($count){

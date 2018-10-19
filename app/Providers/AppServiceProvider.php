@@ -50,6 +50,14 @@ class AppServiceProvider extends ServiceProvider
 
         View::share('menus', $this->menu());
         View::share('controllers', $module);
+
+
+        $all_countries = \DB::table('all_countries')->pluck('name','id');
+       if($all_countries->count()){
+            View::share('all_countries', $all_countries);
+       }else{
+            View::share('all_countries', (object)[]);
+       }
     }
 
     /**

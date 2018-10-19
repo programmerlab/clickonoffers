@@ -8,26 +8,23 @@ use Illuminate\Http\Request;
 use Modules\Admin\Http\Requests\SubCategoryRequest;
 use Modules\Admin\Models\User;
 use Modules\Admin\Models\Category;
-use Modules\Admin\Models\SubCategory;
-//use App\Category;
+use Modules\Admin\Models\SubCategory; 
 use Input;
 use Validator;
 use Auth;
 use Paginate;
 use Grids;
 use HTML;
-use Form;
-use Hash;
+use Form; 
 use View;
-use URL;
-use Lang;
+use URL; 
 use Session;
 use DB;
-use Route;
-use Crypt;
+use Route; 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Dispatcher; 
 use App\Helpers\Helper;
+use Modules\Admin\Http\Requests\CountryRequest;
 
 /**
  * Class AdminController
@@ -105,8 +102,9 @@ class SubCategoryController extends Controller {
         $sub_categories = Category::attr(['name' => 'category_name','class'=>'select-search'])
                         ->renderAsDropdown();  
 
-        $page_title = 'Sub Category';
-        $page_action = 'Create Sub Category'; 
+        $page_title  =  str_replace(['.','create'],'', ucfirst(Route::currentRouteName()));
+        $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
+
         $categories = Category::where('parent_id',0)->get();
 
         return view('admin::sub_category.create', compact('sub_categories','categories', 'html','category', 'page_title', 'page_action'))->withInput(Input::all());
@@ -116,9 +114,15 @@ class SubCategoryController extends Controller {
      * Save Sub category
      * */
 
-    public function store(SubCategoryRequest $request, Category $category) 
+    public function store(CountryRequest $request, Category $category) 
     {  
-          
+       
+        $request->validate([  
+            'category_name' => 'required',
+            'sub_category_name' => 'required'
+        ]);
+
+
         $main_category = Category::find($request->get('category_name'));
        
         $parent_id = $request->get('category_name');
@@ -139,34 +143,50 @@ class SubCategoryController extends Controller {
         $category->level          =  $main_category->level+1;
         $category->description    =  $request->get('description');
 
-         $category->save();
+         try {
+            \DB::beginTransaction(); 
+            $category->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$category->getTable(),$category->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        }  
          
         return Redirect::to(route('sub-category'))
                             ->with('flash_alert_notice', 'New Sub category  successfully created.');
         }
 
     /*
-     * Edit Group method
+     * Edit Category method
      * @param 
      * object : $category
      * */
 
     public function edit(Category $category) {
 
-        $page_title = 'Category';  
-        $page_action = 'Edit Sub category';  
+        $page_title  =  str_replace(['.','edit'],'', ucfirst(Route::currentRouteName()));
+        $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
+
         $categories = Category::where('parent_id',0)->get();
         $url = url($category->sub_category_image) ;
 
         $sub_categories = Category::attr(['name' => 'category_name','class'=>'select-search'])
                         ->selected($category->id)
                         ->renderAsDropdown();  
-         
+
+        $category->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$category->id)
+                            ->where('module_name',$category->getTable())->pluck('country_id');
+
         return view('admin::sub_category.edit', compact('sub_categories','categories','url','category', 'page_title', 'page_action'));
     }
 
-    public function update(Request $request, $category) {
-       
+    public function update(CountryRequest $request, Category $category) 
+    {  
+        $request->validate([  
+            'category_name' => 'required',
+            'sub_category_name' => 'required'
+        ]);
+
         $main_category = Category::find($request->get('category_name'));
        
         $parent_id = $request->get('category_name');
@@ -187,10 +207,17 @@ class SubCategoryController extends Controller {
         $category->level          =  $main_category->level+1;
         $category->description    =  $request->get('description');
 
-        $category->save();
+       try {
+            \DB::beginTransaction(); 
+            $category->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$category->getTable(),$category->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        }  
 
         return Redirect::to(route('sub-category'))
-                        ->with('flash_alert_notice', 'Sub Category   successfully updated.');
+                        ->with('flash_alert_notice', 'Sub Category successfully updated.');
     }
     /*
      *Delete 

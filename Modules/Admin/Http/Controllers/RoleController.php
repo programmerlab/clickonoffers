@@ -14,7 +14,8 @@ use Route;
 use Validator;
 use View;
 use Illuminate\Support\Facades\Input;
-
+use Modules\Admin\Models\Country; 
+use Modules\Admin\Http\Requests\CountryRequest;
 /**
  * Class AdminController
  */
@@ -79,7 +80,7 @@ class RoleController extends Controller
         $page_action =  str_replace('.',' ', ucfirst(Route::currentRouteName()));
 
         $role_type  =  config('role'); // [1=>'admin',2=>'single user',3=>'advertiser'];
- 
+
         return view('admin::role.create', compact('role', 'role_type','page_title', 'page_action'));
     }
 
@@ -87,29 +88,39 @@ class RoleController extends Controller
      * Save Group method
      * */
 
-    public function store(Request $request, Role $role)
+    public function store(CountryRequest $request, Role $role)
     {
 
-
         $validator = Validator::make($request->all(), [
-            'name'       => 'required',
-            'role_type'  => 'required|unique:roles,name'
+            "name"          => "required",
+            "role_type"     => "required|unique:roles,name", 
+            'country' => 'required',
+            'country.*' => 'required_with:country.*',
         ]);
+       // dd($validator );
         /** Return Error Message */
         if ($validator->fails()) {
             return redirect()
                 ->back()
                 ->withInput()
                 ->withErrors($validator);
-        }
-
+        } 
+      
         $role->role_type    =   $request->get('role_type');
         $role->type         =   $request->get('role_type');
         $role->name         =   $request->get('name');
         $role->slug         =   $request->get('name');
         $role->description  =   $request->get('description');
         $role->permissions   = json_encode($request->get('permission'));
-        $role->save();
+        
+        try {
+            \DB::beginTransaction(); 
+            $role->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$role->getTable(),$role->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        } 
 
         return Redirect::to('admin/roles')
             ->with('flash_alert_notice', 'Role was successfully created !');
@@ -135,13 +146,16 @@ class RoleController extends Controller
         }
 
 
+        $role->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$role->id)
+                            ->where('module_name',$role->getTable())->pluck('country_id');
+
+ 
+
         return view('admin::role.edit', compact('role','permissions' ,'role_type','page_title', 'page_action'));
     }
 
-    public function update(Request $request, Role $role)
+    public function update(CountryRequest $request, Role $role)
     {
-
-
         $validator = Validator::make($request->all(), [
             'name'       => 'required',
             'role_type'  => 'required'
@@ -152,7 +166,8 @@ class RoleController extends Controller
                 ->back()
                 ->withInput()
                 ->withErrors($validator);
-        }
+        } 
+
 
         $role->role_type    =   $request->get('role_type');
         $role->type         =   $request->get('role_type');
@@ -160,9 +175,15 @@ class RoleController extends Controller
         $role->slug         =   $request->get('name');
         $role->description  =   $request->get('description');
         $role->permissions   = json_encode($request->get('permission'));
-        $role->save();
-
-        $role->save();
+        
+        try {
+            \DB::beginTransaction(); 
+            $role->save();
+             \Modules\Admin\Models\CountryModule::countryModule($request,$role->getTable(),$role->id);
+             \DB::commit();
+        } catch (\Exception $e) { 
+            \DB::rollback(); 
+        } 
 
         return Redirect::to('admin/roles')
             ->with('flash_alert_notice', 'Role was successfully updated!');

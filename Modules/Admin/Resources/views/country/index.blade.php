@@ -49,9 +49,7 @@
 	                <thead>
 	                    <tr>
                     	 	<th>  Sno. </th>
-	                        <th> Country Name </th>
-                           <th> Currency </th>
-                            <th> Country Code </th>
+	                        <th> Country Name </th> 
 	                        <th> Active Language</th>
 	                        <th> Status </th> 
                           <th> Location </th>
@@ -64,11 +62,20 @@
                     <thead>
                       @foreach($country as $key => $result)
                       <tr>
-                          <td>{{$key++}}</td>
+                          <td>{{++$key}}</td>
                            
-                          <td>{{$result->country->name??'NA'}}</td>
-                          <td>{{$result->country->currency??'NA'}}</td>
-                          <td>{{$result->country->callingCodes??'NA'}}</td>
+                          <td>
+                            @if(count($result->country))
+                            @foreach($result->country as $key => $countryName)
+                              <li>{{$countryName->countryName->name??''}}</li>
+                            @endforeach
+                            
+                            @else
+                              NA
+                            @endif
+                            
+                          </td> 
+
                           <td>{{ $result->activeLanguage->name??'NA' }}</td>
                           <td>{{($result->status==1)?'Active':'Inactive'}}</td>
                           <td>{{$result->location??'NA'}}</td>

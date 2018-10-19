@@ -96,9 +96,9 @@ class AdminUserController  extends Controller
                 if ($role_type) {
                     $query->Where('role_type', $role_type);
                 }
-            })->where('role_type', '=', 3)->Paginate($this->record_per_page);
+            })->where('role_type', '=', 1)->Paginate($this->record_per_page);
         } else {
-            $users = User::orderBy('id', 'desc')->where('role_type', '=', 3)->Paginate($this->record_per_page);
+            $users = User::orderBy('id', 'desc')->where('role_type', '=', 1)->Paginate($this->record_per_page);
         }
         $roles = config('role');
 
@@ -129,6 +129,14 @@ class AdminUserController  extends Controller
 
     public function store(Request $request, User $user)
     {
+         $request->validate([ 
+            'first_name'       => 'required',
+            'last_name'  => 'required',
+            'email'  => 'required|email',
+            'password'  => 'required',
+            'phone'  => 'required',
+        ]);
+
         $user->fill(Input::all());
         $user->password = Hash::make($request->get('password'));
 
@@ -140,9 +148,11 @@ class AdminUserController  extends Controller
                  $user->profile_image = $request->get('profile_image');
             }
         
-        $user->save();
-        $js_file = ['common.js','bootbox.js','formValidate.js'];
+        $user->save(); 
 
+        \Modules\Admin\Models\CountryModule::countryModule($request,$user->getTable(),$user->id);
+
+ 
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->createMessage);
     }
@@ -160,12 +170,26 @@ class AdminUserController  extends Controller
 
         $role_id     = $user->role_type;
         $roles       = config('role');
-        $url         = url($user->profile_image);
+        if($user->profile_image){
+            $url         = url($user->profile_image);
+        }
+        
+        $user->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$user->id)
+                            ->where('module_name',$user->getTable())->pluck('country_id')->toArray();
+
+         
         return view($this->editUrl, compact('url', 'role_id', 'roles', 'user', 'page_title', 'page_action'));
     }
 
     public function update(Request $request, User $user)
     {
+         $request->validate([ 
+            'first_name'       => 'required',
+            'last_name'  => 'required',
+            'email'  => 'required|email', 
+            'phone'  => 'required',
+        ]);
+
         $user->fill(Input::all());
 
         if (!empty($request->get('password'))) {
@@ -187,9 +211,11 @@ class AdminUserController  extends Controller
 
 
         $validator_email = User::where('email', $request->get('email'))
-            ->where('id', '!=', $user->id)->first();
+            ->where('id', '!=', $user->id)
+            ->where('role_type', '=', 1)
+            ->first();
 
-        if ($validator_email) {
+        if ($validator_email) {  
             if ($validator_email->id == $user->id) {
                 $user->save();
             } else {
@@ -200,6 +226,8 @@ class AdminUserController  extends Controller
             }
         }
         $user->save(); 
+        
+        \Modules\Admin\Models\CountryModule::countryModule($request,$user->getTable(),$user->id);
 
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->updateMessage);

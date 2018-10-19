@@ -129,6 +129,14 @@ class SingleUsersController extends Controller
 
     public function store(UserRequest $request, User $user)
     {
+         $request->validate([ 
+            'first_name'       => 'required',
+            'last_name'  => 'required',
+            'email'  => 'required|email',
+            'password'  => 'required',
+            'phone'  => 'required',
+        ]);
+
         $user->fill(Input::all());
         $user->password = Hash::make($request->get('password'));
 
@@ -142,7 +150,7 @@ class SingleUsersController extends Controller
             }
         
         $user->save();
-        $js_file = ['common.js','bootbox.js','formValidate.js'];
+        \Modules\Admin\Models\CountryModule::countryModule($request,$user->getTable(),$user->id);
 
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->createMessage);
@@ -161,13 +169,25 @@ class SingleUsersController extends Controller
 
         $role_id     = $user->role_type;
         $roles       = config('role');
-         $url         = url($user->profile_image);
+         if($user->profile_image){
+            $url         = url($user->profile_image);
+        }
+        
+        $user->country  = \Modules\Admin\Models\CountryModule::where('module_row_id',$user->id)
+                            ->where('module_name',$user->getTable())->pluck('country_id')->toArray();
 
         return view($this->editUrl, compact('url', 'role_id', 'roles', 'user', 'page_title', 'page_action'));
     }
 
     public function update(Request $request, User $user)
     {
+         $request->validate([ 
+            'first_name'       => 'required',
+            'last_name'  => 'required',
+            'email'  => 'required|email', 
+            'phone'  => 'required',
+        ]);
+
         $user->fill(Input::all());
 
         if (!empty($request->get('password'))) {
@@ -188,6 +208,7 @@ class SingleUsersController extends Controller
 
 
         $validator_email = User::where('email', $request->get('email'))
+             ->where('role_type', '=', 2)
             ->where('id', '!=', $user->id)->first();
 
         if ($validator_email) {
@@ -195,13 +216,14 @@ class SingleUsersController extends Controller
                 $user->save();
             } else {
                 return  Redirect::back()->withInput()->with(
-                    'field_errors',
+                    'email',
                       'The Email already been taken!'
                  );
             }
         }
        
         $user->save(); 
+        \Modules\Admin\Models\CountryModule::countryModule($request,$user->getTable(),$user->id);
 
         return Redirect::to($this->defaultUrl)
             ->with('flash_alert_notice', $this->updateMessage);

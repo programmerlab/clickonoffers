@@ -44,8 +44,7 @@ function popupAlert(url,id){
   }
  
 $(function(){ 
-    $('#saveBtn').removeAttr('disabled');
-    
+     
     $('.legitRipple').removeAttr('disabled');
     var id=1;
     $('#add_language').click(function(){

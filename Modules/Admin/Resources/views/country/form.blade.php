@@ -2,23 +2,7 @@
         
         <div class="row">
 
-          
-	     
-         <div class="col-md-6">
-                 <div class="form-group {{ $errors->first('country', ' has-error') }}">
-                    <label>Select  country: <span class="text-danger">*</span></label>
-                     <div class="multi-select-full">
-                         <select class="multiselect-filtering" multiple="multiple" name="country">
-                            @foreach($country_list as $key => $result)
-                            <option value="{{$result->id}}" {{(isset($country->country_id) && $country->country_id==$result->id)?'Selected':''}}>{{$result->name}}</option>
-                             @endforeach
-                        </select>
-                      <span class="help-block">{{ $errors->first('country', ':message') }}</span>
-                      </div>
-                </div>
-            </div> 
-
-
+	      @include('admin::partials.country')
 
          <div class="col-md-6">
                  <div class="form-group {{ $errors->first('status', ' has-error') }}">
@@ -44,8 +28,9 @@
                     <span class="help-block">{{ $errors->first('default_language_id', ':message') }}</span>
                 </div>
             </div>
-            <hr style="border: 1px solid #ccc" />
+         
         <div class="col-md-12">
+               <hr style="border: 1px solid #ccc" />
             <div class="col-md-10" id="language">
                 <div class="form-group col-md-6 {{ $errors->first('language', ' has-error') }}">
                     <label>Select other Language: <span class="text-danger">*</span></label>

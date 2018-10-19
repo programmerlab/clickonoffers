@@ -4,8 +4,8 @@
  
 <input type="hidden" name="tab" value="avtar">
     <div class="form-group">
-         
-        <div class="col-md-12">
+     
+    <div class="col-md-12">
         <div class="form-group  {{ $errors->first('profile_image', ' has-error') }}">
             <label class="control-label col-md-2"> Profile Image <span class="required"> * </span></label>
             <div class="col-lg-6">
@@ -19,13 +19,21 @@
             </div>
         </div>
     </div>
-     <div class="col-md-12">
-            <div class="margin-top-10"> 
-                 <button type="submit" class="btn green btn-primary" value="avtar" name="submit"> Save Changes </button>
-                <button type="submit" class="btn default "> Cancel </button>
+     @include('admin::partials.country2')
+
+   
+
+        <div class="col-md-12">
+             <br><br><br>
+                  <div class="form-group pull-right ">
+                {!! Form::submit(' Save Changes ', ['class'=>'btn  btn-primary text-white','id'=>'saveBtn']) !!}
+
+                 <a href="{{URL::previous()}}">
+            {!! Form::button('Back', ['class'=>'btn btn-warning text-white']) !!} </a>
+                     </div>   
             </div> 
-           
-            </div>
+
+
     </div>
           
 </div>
